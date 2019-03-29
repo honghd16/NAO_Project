@@ -1,3 +1,6 @@
+test/
+pretrained/
+err.log
 *.py[cod]
 *.so
 *.egg
