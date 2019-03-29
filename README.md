@@ -19,7 +19,7 @@
 2. 待补充...
 3. “再见”：NAO将会停止对人脸的追踪，并回复“再见”，之后回到待机状态。
 ### 状态转移图
-<img src="" width="" height="" />
+<img src="https://github.com/raxxerwan/NAO_Project/blob/master/doc/frame.png" />
 
 
 
