@@ -12,14 +12,14 @@ import conf
 import os
 
 class Greeter(object):
-    def __init__(self, session, memory, walker, classifier ,  conf):
+    def __init__(self, session, memory, walker, talker, conf):
         super(Greeter, self).__init__()
         # Get the memory service .
         self.memory = memory
         # Save the walker.  
         self.walker = walker
         # Save the talker. 
-        #self.talker = talker
+        self.talker = talker
         # Save the classifier 
         self.classifier = classifier 
         # Get the services ALTextToSpeech.
@@ -49,13 +49,8 @@ class Greeter(object):
 
 
     def __onGreetingDetected(self, stage, value):
-        #try:
         self.asr.unsubscribe("ASRSubscriber")
         self.faceDetection.unsubscribe("FaceSubscriber")
-        #except Exception, err:
-        #    log.info(err)
-        #    log.info("{} Greeting unsubscribe FAILED!".format(stage))
-        #    sys.exit()
         self.walker.stop("greetings")  # Stop the robot from moving. 
         if stage == "voice":
             soundLocationInfo = self.memory.getData("ALSoundLocalization/SoundLocated")
@@ -81,29 +76,27 @@ class Greeter(object):
                 self.walker.headControl([0.0, elevation])
             
             self.tts.say("你好！")
-            #self.talker.talk()  # Begin to interact with users. 
 
-            # Command subscriber. 
-            #self.commandSubscriber = self.memory.subscribe("WordRecognized")
-            #self.asr.setVocabulary(conf["command"])
-            #self.asr.subscribe("CommandSubscriber")
+            self.talker.ready()  # Begin to interact with users. 
+            try:
+                while not talker.isTimeout():
+                    log.info("Talker still listening for user's command...")
+                    talker.countWait()
+                    time.sleep(4)
+            except Exception, err:
+                log.info("Talker stop listening due to: {}".format(err))
+            log.info("Talker stopped due to timeout.")
+            self.talker.stop()
 
-
-            time.sleep(2)
-            self.classifier.run()
             time.sleep(2)
             self.tts.say("再见！")
             if not thread.KILLED_SIGNAL:
                 self.walker.ready() # Reboot the robot's Walker module.
         thread.MOTION_UNBLOCK()
-        #try:
         if not thread.KILLED_SIGNAL:
             self.faceDetection.subscribe("FaceSubscriber")
+            self.asr.setVocabulary(self.vocabulary, False)
             self.asr.subscribe("ASRSubscriber")
-        #except Exception ,err:
-        #    log.info(err)
-        #    log.info("{} Greeting subscribe FAILED!".format(stage))
-        #    sys.exit()
 
     def ready(self):
         log.info("Getting Greeter ready...")
@@ -145,5 +138,5 @@ class Greeter(object):
                 log.info("faceDetection stopped!")
             log.info("Greeter stopped!")
         except Exception, err:
-            log.info(err)
+            log.info("Greeter Stop FAILED due to: {}".format(err))
 

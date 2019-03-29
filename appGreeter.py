@@ -19,7 +19,8 @@ def main(app):
         try:
             classifier = imageClassifier(session, sess, conf.conf) 
             walker = Walker(session, memory)
-            greeter = Greeter(session, memory, walker, classifier ,conf.conf)
+            talker = Talker(session, memory, classifier, conf.conf)
+            greeter = Greeter(session, memory, walker, talker, conf.conf)
             walker.ready()
             greeter.ready()
             while True:
