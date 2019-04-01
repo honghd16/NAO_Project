@@ -17,10 +17,10 @@ def main(app):
     memory = session.service("ALMemory")
     with tf.Session() as sess:
         try:
-            classifier = imageClassifier(session, sess, conf.conf) 
+            classifier = imageClassifier(session, sess, conf.conf["talker"]["subModule"]["classifier"]) 
             walker = Walker(session, memory)
-            talker = Talker(session, memory, classifier, conf.conf)
-            greeter = Greeter(session, memory, walker, talker, conf.conf)
+            talker = Talker(session, memory, classifier, conf.conf["talker"])
+            greeter = Greeter(session, memory, walker, talker, conf.conf["greeter"])
             walker.ready()
             greeter.ready()
             while True:

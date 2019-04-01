@@ -20,15 +20,13 @@ class Greeter(object):
         self.walker = walker
         # Save the talker. 
         self.talker = talker
-        # Save the classifier 
-        #self.classifier = classifier 
         # Get the services ALTextToSpeech.
         self.tts = session.service("ALTextToSpeech")
         self.tts.setLanguage("Chinese")
         # Get the services ASR
         self.asr = session.service("ALSpeechRecognition")
         self.asr.setParameter("Sensitivity", 0.2)
-        self.vocabulary = conf['greetingVocabulary']
+        self.vocabulary = conf['vocabulary']
         self.threshold = conf['asrConfidenceThreshold']
         # Get the Face Detetion Service
         self.faceDetection = session.service("ALFaceDetection")
@@ -63,7 +61,7 @@ class Greeter(object):
             for his in self.memory.getEventHistory("ALSoundLocalization/SoundLocated"):
                 log.info("Time: {}, {}, Confidence: {}, Energy: {}, Azimuth: {}, Elevation: {}".format(his[0][0][0], his[0][0][1],his[0][1][2], his[0][1][3], his[0][1][0], his[0][1][1]))
         if value == []:
-            log.info("Detection disappeared.")
+            log.info("Detection lost.")
         elif stage == "voice" and value[1] < self.threshold:
             log.info("Unconfident Greeting Detected: {}".format(value))
         else:

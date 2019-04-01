@@ -12,16 +12,19 @@ class Talker(object):
         self.memory = memory 
         # Get ASR service. 
         self.asr = session.service("ALSpeechRecognition")
-        self.vocabulary = conf['commandVocabulary']
-        self.allVocabulary = []
-        for voc in self.vocabulary.values():
-            self.allVocabulary += voc
+        self.vocabulary = []
+        self.vocabularyDict = {}
+        for subModuleName in conf["subModule"].keys():
+            if "vocabulary" in conf["subModule"][subModuleName].keys():
+                log.info(conf["subModule"][subModuleName])
+                self.vocabulary += conf["subModule"][subModuleName]["vocabulary"]
+                self.vocabularyDict[subModuleName] = conf["subModule"][subModuleName]["vocabulary"]
         # Save the classifier. 
         self.classifier = classifier 
 
         # Set counter for timeout. 
         self.count = 0
-        self.timeoutLimit = conf["commandTimeout"]
+        self.timeoutLimit = conf["waitCommandTimeout"]
         log.info("Talker initialized.")
 
         # Command Subscriber.
@@ -40,13 +43,13 @@ class Talker(object):
         if _check_before(self.asr, "ready", "CommandSubscriber"):
             #self.asr.setLanguage("English")
             self.asr.setLanguage("Chinese")
-            self.asr.setVocabulary(self.allVocabulary, False)
+            self.asr.setVocabulary(self.vocabulary, False)
             self.asr.subscribe("CommandSubscriber")
         else:
             self.asr.unsubscribe("CommandSubscriber")
             #self.asr.setLanguage("English")
             self.asr.setLanguage("Chinese")
-            self.asr.setVocabulary(self.allVocabulary, False)
+            self.asr.setVocabulary(self.vocabulary, False)
             self.asr.subscribe("CommandSubscriber")
         log.info("Talker ready!")
 
@@ -68,7 +71,7 @@ class Talker(object):
             word = value[0]
             confidence = value[1]
 
-            if word in self.vocabulary["classifier"]:
+            if word in self.vocabularyDict["classifier"]:
                 self.classifier.run()
                 time.sleep(2)
             else:

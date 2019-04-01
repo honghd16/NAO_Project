@@ -2,14 +2,24 @@
 import os
 ROOT = "/home/wanzn/nao_project"
 conf = {
-    #"ROOT": "/home/wanzn/nao_project",
-    "camFilePath" : os.path.join(ROOT, "modules/image_classifier/camImage"),
-    "asrConfidenceThreshold": 0.3,
-    "greetingVocabulary": ["你好"],
-    "commandVocabulary": {
-        "classifier": ["这是啥","这是什么","这啥","这什么"]
-        #"classifier": ["What is this"]
+    "greeter": {
+        "vocabulary": ["你好"],
+        "asrConfidenceThreshold": 0.3,
+        "tracker": {
+            "faceWidth": 0.1,
+            "maxDistance": 1.0,
+            "period": 50
+            }
         },
-    "commandTimeout": 50, # command timeout limit = commandTimeout * 4 seconds
-    "labelNames" : os.path.join(ROOT,"modules/image_classifier/names_zh")
+    "talker" : {
+        "subModule": {
+            "classifier": {
+                "vocabulary" : ["这是啥","这是什么","这啥","这什么"],
+                "camFilePath" : os.path.join(ROOT, "modules/image_classifier/camImage"),
+                "labelNames" : os.path.join(ROOT,"modules/image_classifier/names_zh"),
+                },
+            "chatter" : {}
+            },
+        "waitCommandTimeout": 50
+        }
 }
