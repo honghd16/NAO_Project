@@ -10,6 +10,7 @@ from tools import *
 from tools import _check_before
 import conf 
 import os
+from facetracker import *
 
 class Greeter(object):
     def __init__(self, session, memory, walker, talker, conf):
@@ -43,6 +44,8 @@ class Greeter(object):
         # ALAutonomousMoves.
         self.automove = session.service("ALAutonomousMoves")
         log.info("Greeter initialized.")
+        # Face Tracker. 
+        self.faceTracker = FaceTracker(session, conf["subModule"]["faceTracker"])
 
 
 
@@ -50,7 +53,8 @@ class Greeter(object):
     def __onGreetingDetected(self, stage, value):
         self.asr.unsubscribe("ASRSubscriber")
         self.faceDetection.unsubscribe("FaceSubscriber")
-        self.walker.stop("greetings")  # Stop the robot from moving. 
+        self.walker.stop("greetings")  # Stop the robot from moving.
+        '''
         if stage == "voice":
             soundLocationInfo = self.memory.getData("ALSoundLocalization/SoundLocated")
             timeWord = long(self.memory.getTimestamp("WordRecognized")[1])
@@ -60,6 +64,7 @@ class Greeter(object):
             log.info("Event history:")
             for his in self.memory.getEventHistory("ALSoundLocalization/SoundLocated"):
                 log.info("Time: {}, {}, Confidence: {}, Energy: {}, Azimuth: {}, Elevation: {}".format(his[0][0][0], his[0][0][1],his[0][1][2], his[0][1][3], his[0][1][0], his[0][1][1]))
+        '''
         if value == []:
             log.info("Detection lost.")
         elif stage == "voice" and value[1] < self.threshold:
@@ -71,7 +76,8 @@ class Greeter(object):
                 elevation = soundLocationInfo[1][1]
                 self.walker.turn(azimuth)
                 self.walker.headControl([0.0, elevation])
-            
+            if stage == "face":
+                self.faceTracker.track()
             self.tts.say("你好！")
 
             self.talker.ready()  # Begin to interact with users. 
@@ -83,6 +89,7 @@ class Greeter(object):
             except Exception, err:
                 log.info("Talker stop listening due to: {}".format(err))
             log.info("Talker stopped due to timeout.")
+            self.faceTracker.stop()
             self.talker.stop()
 
             time.sleep(2)
@@ -123,17 +130,18 @@ class Greeter(object):
         log.info("Greeter ready!")
 
     def stop(self):
-        try:
-            if _check_before(self.asr, "stop", "ASRSubscriber"):
-                self.asr.unsubscribe("ASRSubscriber")
-                log.info("ASR stoped!")
-            if _check_before(self.soundLocater, "stop", "soundLocateSubscriber"):
-                self.soundLocater.unsubscribe("soundLocateSubscriber")
-                log.info("soundLocate stopped!")
-            if _check_before(self.faceDetection, "stop", "FaceSubscriber"):
-                self.faceDetection.unsubscribe("FaceSubscriber")
-                log.info("faceDetection stopped!")
+        if _check_before(self.asr, "stop", "ASRSubscriber"):
+            self.asr.unsubscribe("ASRSubscriber")
+            log.info("ASR stoped!")
+        if _check_before(self.soundLocater, "stop", "soundLocateSubscriber"):
+            self.soundLocater.unsubscribe("soundLocateSubscriber")
+            log.info("soundLocate stopped!")
+        if _check_before(self.faceDetection, "stop", "FaceSubscriber"):
+            self.faceDetection.unsubscribe("FaceSubscriber")
+            log.info("faceDetection stopped!")
             log.info("Greeter stopped!")
-        except Exception, err:
-            log.info("Greeter Stop FAILED due to: {}".format(err))
+        try:
+            self.faceTracker.stop()
+        except Exception,err:
+            log.info("faceTracker already stopped.")
 

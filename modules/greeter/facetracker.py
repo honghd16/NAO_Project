@@ -7,7 +7,7 @@ from tools import *
 
 class FaceTracker(object):
 
-    def __init__(self, session, conf)
+    def __init__(self, session, conf):
         super(FaceTracker, self).__init__()
         self.motion = session.service("ALMotion")
         self.tracker = session.service("ALTracker")
@@ -15,17 +15,17 @@ class FaceTracker(object):
         self.maxDistance = conf["maxDistance"]
         self.period = conf["period"]
 
-    def track(self, targetName):
+    def track(self, targetName="Face"):
         self.motion.wakeUp()
 
         # Add target to track.
         faceWidth = self.faceWidth 
-        tracker.registerTarget(targetName, faceWidth)
-        tracker.track(targetName)
+        self.tracker.registerTarget(targetName, faceWidth)
+        self.tracker.track(targetName)
 
         log.info( "ALTracker successfully started.")
-        tracker.setMaximumDistanceDetection(self.maxDistance)
-        tracker.setExtractorPeriod(targetName, self.period)
+        self.tracker.setMaximumDistanceDetection(self.maxDistance)
+        self.tracker.setExtractorPeriod(targetName, self.period)
 
     def stop(self):
         # Stop tracker.

@@ -5,12 +5,15 @@ conf = {
     "greeter": {
         "vocabulary": ["你好"],
         "asrConfidenceThreshold": 0.3,
-        "tracker": {
-            "faceWidth": 0.1,
-            "maxDistance": 1.0,
-            "period": 50
+        "subModule": {
+            "faceTracker": {
+                "faceWidth": 0.1,
+                "maxDistance": 1.0,
+                "period": 50
+                }
             }
         },
+        
     "talker" : {
         "subModule": {
             "classifier": {

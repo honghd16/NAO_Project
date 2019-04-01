@@ -7,10 +7,8 @@ import argparse
 from modules import *
 import tensorflow as tf
 import time 
-#from tools import log,thread
 from tools import *
 
-camFilePath = './modules/image_classifier/camImage'
 def main(app):
     app.start()
     session = app.session
