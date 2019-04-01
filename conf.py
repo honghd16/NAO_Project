@@ -8,7 +8,8 @@ conf = {
     "greetingVocabulary": ["你好"],
     "commandVocabulary": {
         "classifier": ["这是啥","这是什么","这啥","这什么"]
+        #"classifier": ["What is this"]
         },
-    "commandTimeout": 5, # command timeout limit = commandTimeout * 4 seconds
+    "commandTimeout": 50, # command timeout limit = commandTimeout * 4 seconds
     "labelNames" : os.path.join(ROOT,"modules/image_classifier/names_zh")
 }

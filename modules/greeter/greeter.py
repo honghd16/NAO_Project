@@ -21,14 +21,14 @@ class Greeter(object):
         # Save the talker. 
         self.talker = talker
         # Save the classifier 
-        self.classifier = classifier 
+        #self.classifier = classifier 
         # Get the services ALTextToSpeech.
         self.tts = session.service("ALTextToSpeech")
         self.tts.setLanguage("Chinese")
         # Get the services ASR
         self.asr = session.service("ALSpeechRecognition")
         self.asr.setParameter("Sensitivity", 0.2)
-        self.vocabulary = conf['vocabulary']
+        self.vocabulary = conf['greetingVocabulary']
         self.threshold = conf['asrConfidenceThreshold']
         # Get the Face Detetion Service
         self.faceDetection = session.service("ALFaceDetection")
@@ -44,6 +44,7 @@ class Greeter(object):
         self.soundLocater = session.service("ALSoundLocalization")
         # ALAutonomousMoves.
         self.automove = session.service("ALAutonomousMoves")
+        log.info("Greeter initialized.")
 
 
 
@@ -66,9 +67,7 @@ class Greeter(object):
         elif stage == "voice" and value[1] < self.threshold:
             log.info("Unconfident Greeting Detected: {}".format(value))
         else:
-            log.info("{} Greeting Detected!".format(stage))
-            log.info(value)
-            #self.walker.stop("greetings")  # Stop the robot from moving. 
+            log.info("{} Greeting Detected - Word: {} - Confidence: {}".format(stage, value[0], value[1]))
             if stage == "voice":
                 azimuth = soundLocationInfo[1][0]
                 elevation = soundLocationInfo[1][1]
@@ -79,9 +78,9 @@ class Greeter(object):
 
             self.talker.ready()  # Begin to interact with users. 
             try:
-                while not talker.isTimeout():
+                while not self.talker.isTimeout():
                     log.info("Talker still listening for user's command...")
-                    talker.countWait()
+                    self.talker.countWait()
                     time.sleep(4)
             except Exception, err:
                 log.info("Talker stop listening due to: {}".format(err))

@@ -37,12 +37,14 @@ def main(app):
             log.info("Stopping app due to: {}".format("KeyBoardInterrupting"))
             greeter.stop()
             walker.stop("KeyBoard Interrupting", True)
+            talker.stop()
             sys.exit(0)
         except Exception as err:
             thread.KILL()
             log.info("Stopping app due to: {}".format(str(err)))
             greeter.stop()
             walker.stop("Error occured", True)
+            talker.stop()
             sys.exit(0)
 
 

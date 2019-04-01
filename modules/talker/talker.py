@@ -4,6 +4,7 @@ import time
 import sys
 import argparse
 from tools import *
+from tools import _check_before
 
 class Talker(object):
     def __init__(self, session, memory, classifier, conf):
@@ -21,43 +22,48 @@ class Talker(object):
         # Set counter for timeout. 
         self.count = 0
         self.timeoutLimit = conf["commandTimeout"]
+        log.info("Talker initialized.")
 
-    def isTimeout():
-        return self.count < self.timeoutLimit
+        # Command Subscriber.
+        self.commandSubscriber = self.memory.subscriber("WordRecognized")
+        self.commandSubscriber.signal.connect(self.__onCommandDetected)
 
-    def countWait():
+    def isTimeout(self):
+        return self.count >= self.timeoutLimit
+
+    def countWait(self):
         self.count += 1
 
     def ready(self):
         log.info("Getting Talker ready...")
         self.count = 0
-        if _check_before(self.asr, "ready"), "CommandSubscriber"):
+        if _check_before(self.asr, "ready", "CommandSubscriber"):
+            #self.asr.setLanguage("English")
             self.asr.setLanguage("Chinese")
             self.asr.setVocabulary(self.allVocabulary, False)
             self.asr.subscribe("CommandSubscriber")
         else:
             self.asr.unsubscribe("CommandSubscriber")
+            #self.asr.setLanguage("English")
             self.asr.setLanguage("Chinese")
             self.asr.setVocabulary(self.allVocabulary, False)
             self.asr.subscribe("CommandSubscriber")
         log.info("Talker ready!")
 
     def stop(self):
-        try:
-            log.info("Getting Talker stopped...")
-            self.count = 0
-            if _check_before(self.asr, "stop", "CommandSubscriber"):
-                self.asr.unsubscribe("CommandSubscriber")
-                log.info("ASR (for Command) stoped!")
-            log.info("Talker stopped!")
-        except Exception, err:
-            log.info("Talker Stop FAILED due to : {}".format(err))
+        log.info("Getting Talker stopped...")
+        self.count = 0
+        if _check_before(self.asr, "stop", "CommandSubscriber"):
+            self.asr.unsubscribe("CommandSubscriber")
+            log.info("ASR (for Command) stoped!")
+        log.info("Talker stopped!")
 
     def __onCommandDetected(self, value):
         self.asr.unsubscribe("CommandSubscriber")
         if value == []:
             log.info("Command lost.")
         else:
+            log.info("Command Detected - Word: {} - Confidence: {}".format(value[0], value[1]))
             self.count = 0
             word = value[0]
             confidence = value[1]

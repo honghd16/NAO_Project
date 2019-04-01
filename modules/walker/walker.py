@@ -39,6 +39,7 @@ class Walker(object):
         self.rightSubscriber = self.memory.subscriber("SonarRightDetected")
         self.onRightDetected = partial(self.__onObstacleDetected, "right")
         self.rightSubscriber.signal.connect(self.onRightDetected)
+        log.info("Walker initialized.")
 
     @property 
     def isMoving(self):
