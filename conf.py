@@ -15,8 +15,8 @@ conf = {
         "subModule": {
             "classifier": {
                 "vocabulary" : ["这是啥","这是什么","这啥","这什么"],
-                "camFilePath" : os.path.join(ROOT, "modules/image_classifier/camImage"),
-                "labelNames" : os.path.join(ROOT,"modules/image_classifier/names_zh"),
+                "camFilePath" : os.path.join(ROOT, "modules/talker/image_classifier/camImage"),
+                "labelNames" : os.path.join(ROOT,"modules/talker/image_classifier/names_zh"),
                 },
             "chatter" : {}
             },

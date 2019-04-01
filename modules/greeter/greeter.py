@@ -65,7 +65,7 @@ class Greeter(object):
         elif stage == "voice" and value[1] < self.threshold:
             log.info("Unconfident Greeting Detected: {}".format(value))
         else:
-            log.info("{} Greeting Detected - Word: {} - Confidence: {}".format(stage, value[0], value[1]))
+            log.info("{} Greeting Detected - {}, {}".format(stage, value[0], value[1]))
             if stage == "voice":
                 azimuth = soundLocationInfo[1][0]
                 elevation = soundLocationInfo[1][1]

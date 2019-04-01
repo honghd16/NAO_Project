@@ -5,9 +5,10 @@ import sys
 import argparse
 from tools import *
 from tools import _check_before
+from image_classifier import imageClassifier 
 
 class Talker(object):
-    def __init__(self, session, memory, classifier, conf):
+    def __init__(self, session, tfsess, memory, conf):
         # Save memory. 
         self.memory = memory 
         # Get ASR service. 
@@ -16,11 +17,10 @@ class Talker(object):
         self.vocabularyDict = {}
         for subModuleName in conf["subModule"].keys():
             if "vocabulary" in conf["subModule"][subModuleName].keys():
-                log.info(conf["subModule"][subModuleName])
                 self.vocabulary += conf["subModule"][subModuleName]["vocabulary"]
                 self.vocabularyDict[subModuleName] = conf["subModule"][subModuleName]["vocabulary"]
         # Save the classifier. 
-        self.classifier = classifier 
+        self.classifier = imageClassifier(session, tfsess, conf["subModule"]["classifier"])
 
         # Set counter for timeout. 
         self.count = 0
