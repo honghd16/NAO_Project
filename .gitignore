@@ -1,5 +1,6 @@
 test/
-test_*.py
+test_*
+appImgClassifier.py
 pretrained/
 err.log
 *.py[cod]
