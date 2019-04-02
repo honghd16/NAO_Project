@@ -1,8 +1,6 @@
 # -*- encoding: UTF-8 -*-
 import time
-import almath
-import argparse
-from naoqi import ALProxy
+import qi
 from tools import *
 import time 
 

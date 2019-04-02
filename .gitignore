@@ -1,4 +1,5 @@
 test/
+test_*.py
 pretrained/
 err.log
 *.py[cod]
