@@ -4,12 +4,16 @@ ROOT = "/home/wanzn/nao_project"
 conf = {
     "greeter": {
         "vocabulary": ["你好"],
-        "asrConfidenceThreshold": 0.3,
+        "asrConfidenceThreshold": 0.25,
         "subModule": {
             "faceTracker": {
                 "faceWidth": 0.1,
                 "maxDistance": 1.0,
                 "period": 50
+                },
+            "handShaker" : {
+                "shakeTimes": 5,
+                "maxSpeed": 0.1
                 }
             }
         },
@@ -23,6 +27,6 @@ conf = {
                 },
             "chatter" : {}
             },
-        "waitCommandTimeout": 50
+        "waitCommandTimeout": 4
         }
 }

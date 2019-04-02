@@ -83,7 +83,7 @@ class Walker(object):
         '''
         if body:
             self.motion.wakeUp()
-            self.posture.goToPosture("StandInit", 0.5)
+            self.posture.goToPosture("Stand", 0.5)
         if sonar:
             if not _check_before(self.sonar, "ready", "SonarSubscriber"):
                 self.sonar.unsubscribe("SonarSubscriber")

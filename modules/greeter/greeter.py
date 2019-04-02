@@ -11,6 +11,7 @@ from tools import _check_before
 import conf 
 import os
 from facetracker import *
+from handshaker import *
 
 class Greeter(object):
     def __init__(self, session, memory, walker, talker, conf):
@@ -43,9 +44,11 @@ class Greeter(object):
         self.soundLocater = session.service("ALSoundLocalization")
         # ALAutonomousMoves.
         self.automove = session.service("ALAutonomousMoves")
-        log.info("Greeter initialized.")
         # Face Tracker. 
         self.faceTracker = FaceTracker(session, conf["subModule"]["faceTracker"])
+        # Hand Shaker. 
+        self.handShaker = HandShaker(session, memory, conf["subModule"]["handShaker"])
+        log.info("Greeter initialized.")
 
 
 
@@ -54,32 +57,35 @@ class Greeter(object):
         self.asr.unsubscribe("ASRSubscriber")
         self.faceDetection.unsubscribe("FaceSubscriber")
         self.walker.stop("greetings")  # Stop the robot from moving.
-        '''
+        thread.MOTION_BLOCK()
+        ''' 
         if stage == "voice":
             soundLocationInfo = self.memory.getData("ALSoundLocalization/SoundLocated")
             timeWord = long(self.memory.getTimestamp("WordRecognized")[1])
-            thread.MOTION_BLOCK()
             log.info("Sound Locate Timestamp: {}".format(soundLocationInfo))
             log.info("WordRecognized Timestamp: {}".format(timeWord))
             log.info("Event history:")
             for his in self.memory.getEventHistory("ALSoundLocalization/SoundLocated"):
                 log.info("Time: {}, {}, Confidence: {}, Energy: {}, Azimuth: {}, Elevation: {}".format(his[0][0][0], his[0][0][1],his[0][1][2], his[0][1][3], his[0][1][0], his[0][1][1]))
         '''
+        
         if value == []:
             log.info("Detection lost.")
-        elif stage == "voice" and value[1] < self.threshold:
+        elif stage == "voice" and value[1] < self.threshold: # Check if the detection is confident. 
             log.info("Unconfident Greeting Detected: {}".format(value))
         else:
             log.info("{} Greeting Detected - {}, {}".format(stage, value[0], value[1]))
-            if stage == "voice":
+            
+            if stage == "voice":  # for voice greeting, get the location info of the sound source.
                 azimuth = soundLocationInfo[1][0]
                 elevation = soundLocationInfo[1][1]
                 self.walker.turn(azimuth)
                 self.walker.headControl([0.0, elevation])
-            if stage == "face":
+            if stage == "face":  # for face greeting, launch the face tracker.
                 self.faceTracker.track()
-            self.tts.say("你好！")
 
+            self.tts.say("你好！")
+            self.handShaker.putHand("up")
             self.talker.ready()  # Begin to interact with users. 
             try:
                 while not self.talker.isTimeout():

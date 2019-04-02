@@ -26,7 +26,6 @@ def main(app):
                     #walker.move()
                     time.sleep(4)
                 else:
-                    #walker.posture.goToPosture("Stand", 0.2)
                     log.info("Sleeping.")
                     time.sleep(4)
         except KeyboardInterrupt as err:
