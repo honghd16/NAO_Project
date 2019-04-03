@@ -1,4 +1,4 @@
-# A NAO-based interactive project
+# NAO Project
 
 ## 依赖库
 1. PIL or pillow
