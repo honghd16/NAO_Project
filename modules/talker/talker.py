@@ -33,9 +33,15 @@ class Talker(object):
 
     def isTimeout(self):
         return self.count >= self.timeoutLimit
+    def isGoodbye(self):
+        return self.count < 0
+
+    def isListeningToCommand(self):
+        subers = [s[0] for s in self.asr.getSubscribersInfo()]
+        return True if "CommandSubscriber" in subers else False 
 
     def countWait(self):
-        self.count += 1
+        self.count += 1 if self.isListeningToCommand else 0
 
     def ready(self):
         log.info("Getting Talker ready...")
@@ -74,9 +80,11 @@ class Talker(object):
             if word in self.vocabularyDict["classifier"]:
                 self.classifier.run()
                 time.sleep(2)
+            elif word in self.vocabularyDict["byer"]:
+                self.count = -1
             else:
                 pass
-        if not thread.KILLED_SIGNAL:
+        if not thread.KILLED_SIGNAL and not self.isTimeout(): 
             self.asr.subscribe("CommandSubscriber")
         
 

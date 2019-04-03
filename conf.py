@@ -25,8 +25,11 @@ conf = {
                 "camFilePath" : os.path.join(ROOT, "modules/talker/image_classifier/camImage"),
                 "labelNames" : os.path.join(ROOT,"modules/talker/image_classifier/names_zh"),
                 },
+            "byer": {
+                "vocabulary" : ["再见", "拜拜"]
+                },
             "chatter" : {}
             },
-        "waitCommandTimeout": 4
+        "waitCommandTimeout": 40
         }
 }
