@@ -31,7 +31,7 @@ python app.py
 2. 待补充...
 3. “再见”：NAO将会停止对人脸的追踪，并回复“再见”，之后回到待机状态。
 ### 状态转移图
-<center><img src="https://github.com/raxxerwan/NAO_Project/blob/master/doc/frame.png" /></center>
+<div align=center><img src="https://github.com/raxxerwan/NAO_Project/blob/master/doc/frame.png" /></div>
 
 ## 原理
 ### 避障
@@ -42,7 +42,7 @@ NAO内置了4个麦克风分布在身体的不同侧。当外界声音从不同�
 NAO内置了人脸检测的算法，可以计算出摄像头画面中人脸的Bounding Box和置信度。
 ### 图像分类
 NAO将摄像头中的一帧图像上传到服务器，服务器端使用Resnet v2模型对该图像进行前向推导，获得分类结果。取概率最大的分类结果传回NAO进行语音播报。流程图如下：
-<center><img src="https://github.com/raxxerwan/NAO_Project/blob/master/doc/imageClassifierProcess.png"></center>
+<div align=center><img src="https://github.com/raxxerwan/NAO_Project/blob/master/doc/imageClassifierProcess.png"></div>
 可以看到，在该框架下，NAO与服务器之间的通信不再需要中间机器的协助，即NAO与服务器直接进行通信。因此节约了大量的通信时间，使得用户与NAO之间的交互可以满足实时性要求。具体的性能分析在[图像分类性能分析](#图像分类-1)。
 1. 部署框架：Tensorflow v1.3.0
 2. 模型：Inception-ResNet-v2，[1602.07261](https://arxiv.org/abs/1602.07261)
