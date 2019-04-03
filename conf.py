@@ -20,15 +20,15 @@ conf = {
         
     "talker" : {
         "subModule": {
-            "classifier": {
+            "ImageClassifier": {
                 "vocabulary" : ["这是啥","这是什么","这啥","这什么"],
-                "camFilePath" : os.path.join(ROOT, "modules/talker/image_classifier/camImage"),
-                "labelNames" : os.path.join(ROOT,"modules/talker/image_classifier/names_zh"),
+                "camFilePath" : os.path.join(ROOT, "modules/talker/imageclassifier/camImage"),
+                "labelNames" : os.path.join(ROOT,"modules/talker/imageclassifier/names_zh"),
                 },
-            "byer": {
+            "Byer": {
                 "vocabulary" : ["再见", "拜拜"]
                 },
-            "chatter" : {}
+            #"chatter" : {}
             },
         "waitCommandTimeout": 40
         }

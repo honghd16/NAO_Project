@@ -1,7 +1,4 @@
 # -*- encoding: UTF-8 -*-
-
-"""Example: A Simple class to get & read FaceDetected Events"""
-
 import qi
 import time
 import sys

@@ -88,13 +88,13 @@ class Greeter(object):
             self.handShaker.putHand("up")
             self.talker.ready()  # Begin to interact with users. 
             try:
-                while not self.talker.isTimeout() and self.talker.isGoodbye():
+                while not self.talker.isTimeout() and not self.talker.isGoodbye():
                     log.info("Talker still listening for user's command...")
                     self.talker.countWait()
                     time.sleep(4)
             except Exception, err:
                 log.info("Talker stop listening due to: {}".format(err))
-            reason = "ListenToCommand Timeout" if self.talker.isTimeout else "Goodbye detected by the Talker"
+            reason = "ListenToCommand Timeout: {}".format(self.talker.count) if self.talker.isTimeout() else "Goodbye detected by the Talker"
             log.info("Talker stopped due to {}.".format(reason))
             self.faceTracker.stop()
             self.talker.stop()

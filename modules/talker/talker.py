@@ -2,10 +2,9 @@
 import qi
 import time
 import sys
-import argparse
+from importlib import import_module
 from tools import *
 from tools import _check_before
-from image_classifier import imageClassifier 
 
 class Talker(object):
     def __init__(self, session, tfsess, memory, conf):
@@ -15,12 +14,16 @@ class Talker(object):
         self.asr = session.service("ALSpeechRecognition")
         self.vocabulary = []
         self.vocabularyDict = {}
+        # Init submodules and vocabulary dict.
         for subModuleName in conf["subModule"].keys():
+            # init submodules.
+            sys.path.append("./modules/talker/")
+            subModuleClass = getattr(import_module(subModuleName.lower()), subModuleName) 
+            setattr(self,subModuleName,subModuleClass(session, tfsess, conf["subModule"][subModuleName]))
+            # init vocabulary dict.
             if "vocabulary" in conf["subModule"][subModuleName].keys():
                 self.vocabulary += conf["subModule"][subModuleName]["vocabulary"]
                 self.vocabularyDict[subModuleName] = conf["subModule"][subModuleName]["vocabulary"]
-        # Save the classifier. 
-        self.classifier = imageClassifier(session, tfsess, conf["subModule"]["classifier"])
 
         # Set counter for timeout. 
         self.count = 0
@@ -77,13 +80,13 @@ class Talker(object):
             word = value[0]
             confidence = value[1]
 
-            if word in self.vocabularyDict["classifier"]:
-                self.classifier.run()
-                time.sleep(2)
-            elif word in self.vocabularyDict["byer"]:
-                self.count = -1
-            else:
-                pass
+            for subModuleName, vocabulary in self.vocabularyDict.items():
+                if word in vocabulary:
+                    if subModuleName == "byer":
+                        self.count = -1
+                    else:
+                        getattr(self, subModuleName).run()
+                    break
         if not thread.KILLED_SIGNAL and not self.isTimeout(): 
             self.asr.subscribe("CommandSubscriber")
         

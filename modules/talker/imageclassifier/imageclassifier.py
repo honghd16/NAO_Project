@@ -9,7 +9,7 @@ import os
 import qi
 import argparse
 
-class imageClassifier():
+class ImageClassifier():
     def __init__(self, naoSession, tfSession ,conf):
         # Starting Service 
         self.videoService = naoSession.service("ALVideoDevice")
