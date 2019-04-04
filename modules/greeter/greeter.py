@@ -13,6 +13,7 @@ import os
 from facetracker import *
 from handshaker import *
 
+@qi.singleThreaded()
 class Greeter(object):
     def __init__(self, session, memory, walker, talker, conf):
         super(Greeter, self).__init__()
@@ -34,12 +35,10 @@ class Greeter(object):
         self.faceDetection = session.service("ALFaceDetection")
         # Voice Greeting Subscriber.
         self.greetingSubscriber = self.memory.subscriber("WordRecognized")
-        onVoiceGreetingDetected = partial(self.__onGreetingDetected, "voice")
-        self.greetingSubscriber.signal.connect(onVoiceGreetingDetected)
+        self.greetingId = self.greetingSubscriber.signal.connect(partial(self.__onGreetingDetected, "voice"))
         # Face Greeting Subscriber. 
         self.faceSubscriber = self.memory.subscriber("FaceDetected")
-        onFaceGreetingDetected = partial(self.__onGreetingDetected, "face")
-        self.faceSubscriber.signal.connect(onFaceGreetingDetected)
+        #self.faceId = self.faceSubscriber.signal.connect(partial(self.__onGreetingDetected, "face"))
         # Sound Source Locater.
         self.soundLocater = session.service("ALSoundLocalization")
         # ALAutonomousMoves.
@@ -50,25 +49,22 @@ class Greeter(object):
         self.handShaker = HandShaker(session, memory, conf["subModule"]["handShaker"])
         log.info("Greeter initialized.")
 
-
-
-
     def __onGreetingDetected(self, stage, value):
-        self.asr.unsubscribe("ASRSubscriber")
         self.faceDetection.unsubscribe("FaceSubscriber")
+        self.asr.unsubscribe("ASRSubscriber")
         self.walker.stop("greetings")  # Stop the robot from moving.
         thread.MOTION_BLOCK()
-        ''' 
-        if stage == "voice":
-            soundLocationInfo = self.memory.getData("ALSoundLocalization/SoundLocated")
-            timeWord = long(self.memory.getTimestamp("WordRecognized")[1])
-            log.info("Sound Locate Timestamp: {}".format(soundLocationInfo))
-            log.info("WordRecognized Timestamp: {}".format(timeWord))
-            log.info("Event history:")
-            for his in self.memory.getEventHistory("ALSoundLocalization/SoundLocated"):
-                log.info("Time: {}, {}, Confidence: {}, Energy: {}, Azimuth: {}, Elevation: {}".format(his[0][0][0], his[0][0][1],his[0][1][2], his[0][1][3], his[0][1][0], his[0][1][1]))
-        '''
-        
+         
+        #if stage == "voice":
+            #soundLocationInfo = self.memory.getData("ALSoundLocalization/SoundLocated")
+            #timeWord = long(self.memory.getTimestamp("WordRecognized")[1])
+            #log.info("Sound Locate Timestamp: {}".format(soundLocationInfo))
+            #log.info("WordRecognized Timestamp: {}".format(timeWord))
+            #log.info("Event history:")
+            #for his in self.memory.getEventHistory("ALSoundLocalization/SoundLocated"):
+            #    log.info("Time: {}, {}, Confidence: {}, Energy: {}, Azimuth: {}, Elevation: {}".format(his[0][0][0], his[0][0][1],his[0][1][2], his[0][1][3], his[0][1][0], his[0][1][1]))
+        for his in self.memory.getEventHistory("WordRecognized"):
+           log.info(his) 
         if value == []:
             log.info("Detection lost.")
         elif stage == "voice" and value[1] < self.threshold: # Check if the detection is confident. 
@@ -105,9 +101,9 @@ class Greeter(object):
                 self.walker.ready() # Reboot the robot's Walker module.
         thread.MOTION_UNBLOCK()
         if not thread.KILLED_SIGNAL:
-            self.faceDetection.subscribe("FaceSubscriber")
             self.asr.setVocabulary(self.vocabulary, False)
             self.asr.subscribe("ASRSubscriber")
+            self.faceDetection.subscribe("FaceSubscriber")
 
     def ready(self):
         log.info("Getting Greeter ready...")
@@ -129,10 +125,10 @@ class Greeter(object):
             self.soundLocater.subscribe("soundLocateSubscriber")
 
         if _check_before(self.faceDetection, "ready", "FaceSubscriber"):
-            self.faceDetection.subscribe("FaceSubscriber")
+            self.faceDetection.subscribe("FaceSubscriber", period=1000)
         else:
             self.faceDetection.unsubscribe("FaceSubscriber")
-            self.faceDetection.subscribe("FaceSubscriber")
+            self.faceDetection.subscribe("FaceSubscriber", period=1000)
             
         log.info("Greeter ready!")
 

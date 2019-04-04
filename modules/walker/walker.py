@@ -10,7 +10,7 @@ from tools import *
 from tools import _check_before
 import conf
 
-
+@qi.singleThreaded()
 class Walker(object):
     def __init__(self, session, memory):
         super(Walker, self).__init__()

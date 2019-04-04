@@ -6,6 +6,7 @@ from importlib import import_module
 from tools import *
 from tools import _check_before
 
+@qi.singleThreaded()
 class Talker(object):
     def __init__(self, session, tfsess, memory, conf):
         # Save memory. 
@@ -28,11 +29,10 @@ class Talker(object):
         # Set counter for timeout. 
         self.count = 0
         self.timeoutLimit = conf["waitCommandTimeout"]
-        log.info("Talker initialized.")
-
         # Command Subscriber.
         self.commandSubscriber = self.memory.subscriber("WordRecognized")
-        self.commandSubscriber.signal.connect(self.__onCommandDetected)
+        log.info("Talker initialized.")
+
 
     def isTimeout(self):
         return self.count >= self.timeoutLimit
@@ -60,6 +60,7 @@ class Talker(object):
             self.asr.setLanguage("Chinese")
             self.asr.setVocabulary(self.vocabulary, False)
             self.asr.subscribe("CommandSubscriber")
+        self.commandId = self.commandSubscriber.signal.connect(self.__onCommandDetected)
         log.info("Talker ready!")
 
     def stop(self):
@@ -68,11 +69,14 @@ class Talker(object):
         if _check_before(self.asr, "stop", "CommandSubscriber"):
             self.asr.unsubscribe("CommandSubscriber")
             log.info("ASR (for Command) stoped!")
+        self.commandSubscriber.signal.disconnect(self.commandId)
         log.info("Talker stopped!")
 
     def __onCommandDetected(self, value):
+        for his in self.memory.getEventHistory("WordRecognized"):
+            log.info(his)
         self.asr.unsubscribe("CommandSubscriber")
-        if value == []:
+        if value[0] == '':
             log.info("Command lost.")
         else:
             log.info("Command Detected - Word: {} - Confidence: {}".format(value[0], value[1]))
