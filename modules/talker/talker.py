@@ -66,15 +66,16 @@ class Talker(object):
     def stop(self):
         log.info("Getting Talker stopped...")
         self.count = 0
+        try:
+            self.commandSubscriber.signal.disconnect(self.commandId)
+        except Exception,err:
+            log.info("Disconnect command subscriber without connecting. {}".format(err))
         if _check_before(self.asr, "stop", "CommandSubscriber"):
             self.asr.unsubscribe("CommandSubscriber")
             log.info("ASR (for Command) stoped!")
-        self.commandSubscriber.signal.disconnect(self.commandId)
         log.info("Talker stopped!")
 
     def __onCommandDetected(self, value):
-        for his in self.memory.getEventHistory("WordRecognized"):
-            log.info(his)
         self.asr.unsubscribe("CommandSubscriber")
         if value[0] == '':
             log.info("Command lost.")

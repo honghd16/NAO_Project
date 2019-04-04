@@ -7,6 +7,8 @@ def _check_before(service, stage, subscriberName):
                 return False
         return True
     if stage == "stop":
+        if subscriberName=="SonarSubscriber":
+            log.info(service.getSubscribersInfo())
         for suber in service.getSubscribersInfo():
             if subscriberName in suber:
                 return True

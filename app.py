@@ -31,16 +31,20 @@ def main(app):
         except KeyboardInterrupt as err:
             thread.KILL()
             log.info("Stopping app due to: {}".format("KeyBoardInterrupting"))
+            thread.MOTION_BLOCK()
+            log.info("All child threads done.")
             greeter.stop()
-            walker.stop("KeyBoard Interrupting", True)
             talker.stop()
+            walker.stop("KeyBoard Interrupting", True)
             sys.exit(0)
         except Exception as err:
             thread.KILL()
             log.info("Stopping app due to: {}".format(str(err)))
+            thread.MOTION_BLOCK()
+            log.info("All child threads done.")
             greeter.stop()
-            walker.stop("Error occured", True)
             talker.stop()
+            walker.stop("Error occured", True)
             sys.exit(0)
 
 

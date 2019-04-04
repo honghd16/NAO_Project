@@ -29,13 +29,6 @@ class Walker(object):
         self.motion.setMoveArmsEnabled(True, True)
         self.motion.setMotionConfig([["ENABLE_FOOT_CONTACT_PROTECTION", True]])
         self.posture = session.service("ALRobotPosture")
-        # Connect the event callback.
-        self.leftSubscriber = self.memory.subscriber("SonarLeftDetected")
-        self.onLeftDetected = partial(self.__onObstacleDetected, "left")
-        self.leftSubscriber.signal.connect(self.onLeftDetected)
-        self.rightSubscriber = self.memory.subscriber("SonarRightDetected")
-        self.onRightDetected = partial(self.__onObstacleDetected, "right")
-        self.rightSubscriber.signal.connect(self.onRightDetected)
         log.info("Walker initialized.")
 
     @property 
@@ -85,6 +78,11 @@ class Walker(object):
             if not _check_before(self.sonar, "ready", "SonarSubscriber"):
                 self.sonar.unsubscribe("SonarSubscriber")
             self.sonar.subscribe("SonarSubscriber")
+            # Connect the event callback.
+            self.leftSubscriber = self.memory.subscriber("SonarLeftDetected")
+            self.leftId = self.leftSubscriber.signal.connect(partial(self.__onObstacleDetected, "left"))
+            self.rightSubscriber = self.memory.subscriber("SonarRightDetected")
+            self.rightId = self.rightSubscriber.signal.connect(partial(self.__onObstacleDetected, "right"))
         log.info("Walker ready.")
        
 
@@ -92,6 +90,11 @@ class Walker(object):
 
         if _check_before(self.sonar, "stop", "SonarSubscriber"):
             self.sonar.unsubscribe("SonarSubscriber")
+        try:
+            self.rightSubscriber.signal.disconnect(self.rightId)
+            self.leftSubscriber.signal.disconnect(self.leftId)
+        except Exception,err:
+            log.info("Disconnect sonar subscriber without connecting before. {}".format(err))
         self.motion.stopMove()
         if rest:
             self.motion.rest()
@@ -103,8 +106,8 @@ class Walker(object):
         """
         Callback for event Obstacles Detected. 
         """
-        self.stop("Obstacles")
         thread.MOTION_BLOCK()
+        self.stop("Obstacles")
         log.info("Obstacle Detected: {}".format(value))
         if value == []:  # empty value when the obstacle disappears
             pass
@@ -116,6 +119,6 @@ class Walker(object):
             else:
                 #self.tts.say("左转")
                 self.turn("left")
-        thread.MOTION_UNBLOCK()
         if not thread.KILLED_SIGNAL:
             self.ready(body=False, sonar=True)
+        thread.MOTION_UNBLOCK()
