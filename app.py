@@ -28,23 +28,23 @@ def main(app):
                 else:
                     log.info("Sleeping.")
                     time.sleep(4)
-        except KeyboardInterrupt as err:
-            thread.KILL()
-            log.info("Stopping app due to: {}".format("KeyBoardInterrupting"))
-            thread.MOTION_BLOCK()
+        except KeyboardInterrupt, err:
+            KILLED_EVENT.set()
+            log.info("Stopping app due to: {}, waiting for all child threads done.".format(err))
+            MOTION_LOCK.acquire()
             log.info("All child threads done.")
             greeter.stop()
             talker.stop()
-            walker.stop("KeyBoard Interrupting", True)
+            walker.stop(err, True)
             sys.exit(0)
-        except Exception as err:
-            thread.KILL()
-            log.info("Stopping app due to: {}".format(str(err)))
-            thread.MOTION_BLOCK()
+        except Exception, err:
+            KILLED_EVENT.set()
+            log.info("Stopping app due to: {}, waiting for all child threads done.".format(err))
+            MOTION_LOCK.acquire()
             log.info("All child threads done.")
             greeter.stop()
             talker.stop()
-            walker.stop("Error occured", True)
+            walker.stop(err, True)
             sys.exit(0)
 
 

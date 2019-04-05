@@ -1,5 +1,6 @@
 test/
-test_*
+test*
+kill.py
 appImgClassifier.py
 pretrained/
 err.log

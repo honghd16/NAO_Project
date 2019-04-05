@@ -69,11 +69,11 @@ class Talker(object):
         try:
             self.commandSubscriber.signal.disconnect(self.commandId)
         except Exception,err:
-            log.info("Disconnect command subscriber without connecting. {}".format(err))
+            log.warning("Disconnect command subscriber without connecting. {}".format(err))
         if _check_before(self.asr, "stop", "CommandSubscriber"):
             self.asr.unsubscribe("CommandSubscriber")
             log.info("ASR (for Command) stoped!")
-        log.info("Talker stopped!")
+        log.info("Talker successfully stopped!")
 
     def __onCommandDetected(self, value):
         self.asr.unsubscribe("CommandSubscriber")

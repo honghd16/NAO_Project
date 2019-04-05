@@ -2,8 +2,10 @@
 import time
 import qi
 from tools import *
-import time 
+import time
 
+
+@qi.singleThreaded()
 class HandShaker(object):
     def __init__(self, session, memory, conf):
         super(HandShaker, self).__init__()

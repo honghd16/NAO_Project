@@ -44,13 +44,7 @@ class Walker(object):
         Y = random.uniform(0.0, 0.5)
         Theta = random.uniform(0.0, 0.5)
         Frequency = random.random()
-
-        try:
-            self.motion.moveToward(0.5, 0, 0, [["Frequency", Frequency]])
-        except Exception, errorMsg:
-            log.info( str(errorMsg))
-            log.info( "Moving Failed!")
-            exit()
+        self.motion.moveToward(0.5, 0, 0, [["Frequency", Frequency]])
 
     def headControl(self, angles, speed=0.2):
         names  = ["HeadYaw", "HeadPitch"]
@@ -87,26 +81,26 @@ class Walker(object):
        
 
     def stop(self, reason ,rest=False):
-
+        log.info("Getting Walker stopped due to: {}".format(reason))
         if _check_before(self.sonar, "stop", "SonarSubscriber"):
             self.sonar.unsubscribe("SonarSubscriber")
         try:
             self.rightSubscriber.signal.disconnect(self.rightId)
             self.leftSubscriber.signal.disconnect(self.leftId)
         except Exception,err:
-            log.info("Disconnect sonar subscriber without connecting before. {}".format(err))
+            log.warning("Disconnect sonar subscriber without connecting before. {}".format(err))
         self.motion.stopMove()
         if rest:
             self.motion.rest()
             self.motion.waitUntilMoveIsFinished()
-        log.info("Walker stopped due to {}.".format(reason))
+        log.info("Walker successfully stopped.")
 
 
     def __onObstacleDetected(self, side, value):
-        """
-        Callback for event Obstacles Detected. 
-        """
-        thread.MOTION_BLOCK()
+        if KILLED_EVENT.is_set():
+            #log.info("The main thread has been terminated, this child thread will not be executed.")
+            return 
+        MOTION_LOCK.acquire()
         self.stop("Obstacles")
         log.info("Obstacle Detected: {}".format(value))
         if value == []:  # empty value when the obstacle disappears
@@ -119,6 +113,5 @@ class Walker(object):
             else:
                 #self.tts.say("左转")
                 self.turn("left")
-        if not thread.KILLED_SIGNAL:
-            self.ready(body=False, sonar=True)
-        thread.MOTION_UNBLOCK()
+        self.ready(body=False, sonar=True)
+        MOTION_LOCK.release()

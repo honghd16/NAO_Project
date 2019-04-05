@@ -41,20 +41,23 @@ class Greeter(object):
         self.soundLocater = session.service("ALSoundLocalization")
         # ALAutonomousMoves.
         self.automove = session.service("ALAutonomousMoves")
+        self.automove.setExpressiveListeningEnabled(False)
         # Face Tracker. 
         self.faceTracker = FaceTracker(session, conf["subModule"]["faceTracker"])
         # Hand Shaker. 
         self.handShaker = HandShaker(session, memory, conf["subModule"]["handShaker"])
 
-        self.greetingId = self.greetingSubscriber.signal.connect(partial(self.__onGreetingDetected, "voice"))
-        self.faceId = self.faceSubscriber.signal.connect(partial(self.__onGreetingDetected, "face"))
         log.info("Greeter initialized.")
 
     def __onGreetingDetected(self, stage, value):
+        if KILLED_EVENT.is_set():
+            #log.info("The main thread has been terminated, this child thread will not be executed.")
+            return
         self.walker.stop("greetings")  # Stop the robot from moving.
-        thread.MOTION_BLOCK()
-        self.faceDetection.unsubscribe("FaceSubscriber")
-        self.asr.unsubscribe("ASRSubscriber")
+        MOTION_LOCK.acquire()
+        self.stop()
+        #self.faceDetection.unsubscribe("FaceSubscriber")
+        #self.asr.unsubscribe("ASRSubscriber")
         #if stage == "voice":
             #soundLocationInfo = self.memory.getData("ALSoundLocalization/SoundLocated")
             #timeWord = long(self.memory.getTimestamp("WordRecognized")[1])
@@ -82,34 +85,29 @@ class Greeter(object):
             self.handShaker.putHand("up")
             self.talker.ready()  # Begin to interact with users. 
             try:
-                while not self.talker.isTimeout() and not self.talker.isGoodbye() and not thread.KILLED_SIGNAL:
+                while not self.talker.isTimeout() and not self.talker.isGoodbye() and not KILLED_EVENT.is_set():
                     log.info("Talker still listening for user's command...")
                     self.talker.countWait()
                     time.sleep(4)
             except Exception, err:
-                log.info("Talker stop listening to command due to: {}".format(err))
+                log.warning("Talker stop listening to command due to: {}".format(err))
             else:
                 if self.talker.isTimeout():
                     reason = "ListenToCommand Timeout: {}".format(self.talker.count)
                 if self.talker.isGoodbye():
                     reason = "Goodbye detected by the Talker"
-                if thread.KILLED_SIGNAL:
+                if KILLED_EVENT.is_set():
                     reason = "KeyboardInterrupt."
                 log.info("Talker stop listenning to command due to {}.".format(reason))
             self.faceTracker.stop()
             self.talker.stop()
             self.tts.say("再见！")
-            #if not thread.KILLED_SIGNAL:
-            self.walker.ready() # Reboot the robot's Walker module.
-        #if not thread.KILLED_SIGNAL:
-        self.asr.setVocabulary(self.vocabulary, False)
-        self.asr.subscribe("ASRSubscriber")
-        self.faceDetection.subscribe("FaceSubscriber")
-        thread.MOTION_UNBLOCK()
+        self.walker.ready() # Reboot the robot's Walker module.
+        self.ready()
+        MOTION_LOCK.release()
 
     def ready(self):
         log.info("Getting Greeter ready...")
-        self.automove.setExpressiveListeningEnabled(False)
         if _check_before(self.asr, "ready", "ASRSubscriber"):
             self.asr.setLanguage("Chinese")
             self.asr.setVocabulary(self.vocabulary, False)
@@ -131,17 +129,17 @@ class Greeter(object):
         else:
             self.faceDetection.unsubscribe("FaceSubscriber")
             self.faceDetection.subscribe("FaceSubscriber")
-
-            
+        self.greetingId = self.greetingSubscriber.signal.connect(partial(self.__onGreetingDetected, "voice"))
+        self.faceId = self.faceSubscriber.signal.connect(partial(self.__onGreetingDetected, "face"))
         log.info("Greeter ready!")
 
     def stop(self):
-        #try:
-        #    self.greetingSubscriber.signal.disconnect(self.greetingId)
-        #    self.faceSubscriber.signal.disconnect(self.faceId)
-        #except Exception,err:
-        #    log.info("Disconnect greeting/face subscriber without connecting before. {}".format(err))
-
+        try:
+            self.greetingSubscriber.signal.disconnect(self.greetingId)
+            self.faceSubscriber.signal.disconnect(self.faceId)
+        except Exception,err:
+            log.warning("Disconnect greeting/face subscriber without connecting before. {}".format(err))
+        log.info("Getting greeter stopped...")
         if _check_before(self.asr, "stop", "ASRSubscriber"):
             self.asr.unsubscribe("ASRSubscriber")
             log.info("ASR stoped!")
@@ -155,5 +153,6 @@ class Greeter(object):
         try:
             self.faceTracker.stop()
         except Exception,err:
-            log.info("faceTracker already stopped.")
+            log.warning("faceTracker already stopped.")
+        log.info("Greeter successfully stopped.")
 
