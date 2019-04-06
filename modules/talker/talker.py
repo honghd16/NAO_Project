@@ -76,7 +76,7 @@ class Talker(object):
         log.info("Talker successfully stopped!")
 
     def __onCommandDetected(self, value):
-        self.asr.unsubscribe("CommandSubscriber")
+        self.stop()
         if value[0] == '':
             log.info("Command lost.")
         else:
