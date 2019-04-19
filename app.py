@@ -22,9 +22,11 @@ def main(app):
             greeter.ready()
             while True:
                 if walker.isMoving:
+                    MOTION_LOCK.acquire()
                     log.info("Moving forward.")
-                    #walker.move()
+                    walker.move()
                     time.sleep(4)
+                    MOTION_LOCK.release()
                 else:
                     log.info("Sleeping.")
                     time.sleep(4)

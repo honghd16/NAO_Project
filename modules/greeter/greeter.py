@@ -58,8 +58,8 @@ class Greeter(object):
         self.stop()
         #self.faceDetection.unsubscribe("FaceSubscriber")
         #self.asr.unsubscribe("ASRSubscriber")
-        #if stage == "voice":
-            #soundLocationInfo = self.memory.getData("ALSoundLocalization/SoundLocated")
+        if stage == "voice":
+            soundLocationInfo = self.memory.getData("ALSoundLocalization/SoundLocated")
             #timeWord = long(self.memory.getTimestamp("WordRecognized")[1])
             #log.info("Sound Locate Timestamp: {}".format(soundLocationInfo))
             #log.info("WordRecognized Timestamp: {}".format(timeWord))
@@ -78,8 +78,8 @@ class Greeter(object):
                 elevation = soundLocationInfo[1][1]
                 self.walker.turn(azimuth)
                 self.walker.headControl([0.0, elevation])
-            if stage == "face":  # for face greeting, launch the face tracker.
-                self.faceTracker.track()
+            #if stage == "face":  # for face greeting, launch the face tracker.
+            self.faceTracker.track()
 
             self.tts.say("你好！")
             self.handShaker.putHand("up")

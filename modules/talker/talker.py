@@ -87,13 +87,13 @@ class Talker(object):
 
             for subModuleName, vocabulary in self.vocabularyDict.items():
                 if word in vocabulary:
-                    if subModuleName == "byer":
+                    if subModuleName == "Byer":
                         self.count = -1
                     else:
                         getattr(self, subModuleName).run()
                     break
-        if not thread.KILLED_SIGNAL and not self.isTimeout(): 
-            self.asr.subscribe("CommandSubscriber")
+        if not KILLED_EVENT.is_set() and not self.isTimeout():
+            self.ready()
         
 
     

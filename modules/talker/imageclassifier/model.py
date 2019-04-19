@@ -12,7 +12,6 @@ import numpy as np
 HEIGHT = 299
 WIDTH = 299
 CHANNELS = 3
-CKPPATH = './pretrained/inception_resnet_v2_2016_08_30.ckpt'
 
 #Create Graph
 class Model():
@@ -32,6 +31,7 @@ class Model():
         self.predictions = self.end_points['Predictions']
         # Load Chinese label names.
         self.names = []
+        self.ckpPath = conf["checkpointPath"]
         with open(conf["labelNames"], "r") as f:
             name = f.readline()
             while name:
@@ -43,12 +43,12 @@ class Model():
         log.info("Model Initialized.")
 
     def load(self, sess):
-         log.info("Loading checkpoints from {} ...".format(CKPPATH))
-         saver = tf.train.Saver()
-         t0 = time.time()
-         saver.restore(sess, CKPPATH)
-         t1 = time.time()
-         log.info("Checkpoints loading completed in {} seconds.".format(t1-t0))
+        log.info("Loading checkpoints from {} ...".format(self.ckpPath))
+        saver = tf.train.Saver()
+        t0 = time.time()
+        saver.restore(sess, self.ckpPath)
+        t1 = time.time()
+        log.info("Checkpoints loading completed in {} seconds.".format(t1-t0))
 
     def run(self, sess, img):
         if(img.shape[0]!=WIDTH or img.shape[1]!=HEIGHT):

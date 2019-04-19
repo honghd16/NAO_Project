@@ -3,6 +3,7 @@ test*
 kill.py
 appImgClassifier.py
 pretrained/
+modules/talker/objectdetecter/data/darknet_weights
 err.log
 *.py[cod]
 *.so
